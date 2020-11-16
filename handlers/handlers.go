@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/Kamva/mgm/v3"
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	"github.com/nik-gautam/octave-url-backend/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -54,12 +53,20 @@ func GetLongUrl(c *fiber.Ctx) error {
 		})
 	}
 
+	url.Count++
+
+	if err := urlColl.Update(url); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"msg":     "Unable to update count to DB",
+			"err":     err.Error(),
+		})
+	}
+
 	return c.Redirect(url.LongUrl)
 }
 
 func PostAddUrl(c *fiber.Ctx) error {
-	_ = godotenv.Load()
-
 	reqUrl := new(RequestUrl)
 
 	if err := c.BodyParser(reqUrl); err != nil {
@@ -86,12 +93,19 @@ func PostAddUrl(c *fiber.Ctx) error {
 }
 
 func PatchEditUrl(c *fiber.Ctx) error {
-	_ = godotenv.Load()
 
 	urlColl := mgm.CollectionByName("urls")
 	existingUrl := &models.Urls{}
 
 	reqUrl := new(PatchUrl)
+
+	if err := c.BodyParser(reqUrl); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"msg":     "Internal Body Parser Error",
+			"err":     err.Error(),
+		})
+	}
 
 	if err := urlColl.FindByID(reqUrl.Id, existingUrl); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -124,7 +138,6 @@ func PatchEditUrl(c *fiber.Ctx) error {
 }
 
 func DeleteUrl(c *fiber.Ctx) error {
-	_ = godotenv.Load()
 
 	urlColl := mgm.CollectionByName("urls")
 	existingUrl := &models.Urls{}

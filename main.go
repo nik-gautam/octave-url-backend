@@ -32,7 +32,7 @@ func main() {
 	app.Get("/:shortCode", handlers.GetLongUrl)
 	app.Post("/", handlers.PostAddUrl)
 	app.Patch("/", handlers.PatchEditUrl)
-	app.Delete("/", handlers.DeleteUrl)
+	app.Delete("/:id", handlers.DeleteUrl)
 
 	log.Fatal(app.Listen(":3000"))
 

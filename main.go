@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
@@ -28,7 +27,7 @@ func main() {
 
 	app.Use(cors.New())
 	app.Use(logger.New())
-	app.Use(cache.New())
+	//app.Use(cache.New())
 
 	app.Get("/", handlers.GetAllUrls)
 	app.Get("/:shortCode", handlers.GetLongUrl)

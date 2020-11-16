@@ -1,1 +1,1 @@
-web: octave_url
+web: octave-url

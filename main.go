@@ -30,7 +30,7 @@ func main() {
 	//app.Use(cache.New())
 
 	app.Get("/", func(ctx *fiber.Ctx) error {
-		return ctx.SendString("Welcome to octave url shortener 2.0")
+		return ctx.Redirect("https://octave-shortener.netlify.app/")
 	})
 	app.Get("/all", handlers.GetAllUrls)
 	app.Get("/:shortCode", handlers.GetLongUrl)

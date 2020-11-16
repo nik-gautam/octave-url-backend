@@ -2,7 +2,6 @@ package models
 
 import (
 	"github.com/Kamva/mgm/v3"
-	"github.com/teris-io/shortid"
 )
 
 type Urls struct {
@@ -13,19 +12,7 @@ type Urls struct {
 	UrlCode          string `json:"urlCode" bson:"urlCode"`
 }
 
-func generateCode() (string, error) {
-	return shortid.Generate()
-}
-
-func CreateUrl(longUrl string, customCode string, baseUrl string) *Urls {
-	shortCode := ""
-
-	if customCode != "" {
-		shortCode = customCode
-	} else {
-		shortCode, _ = generateCode()
-	}
-
+func CreateUrl(longUrl string, shortCode string, baseUrl string) *Urls {
 	return &Urls{
 		ShortUrl: baseUrl + shortCode,
 		LongUrl:  longUrl,

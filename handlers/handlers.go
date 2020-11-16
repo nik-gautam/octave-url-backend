@@ -4,6 +4,7 @@ import (
 	"github.com/Kamva/mgm/v3"
 	"github.com/gofiber/fiber/v2"
 	"github.com/nik-gautam/octave-url-backend/models"
+	"github.com/teris-io/shortid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"os"
@@ -77,19 +78,41 @@ func PostAddUrl(c *fiber.Ctx) error {
 		})
 	}
 
-	newUrl := models.CreateUrl(reqUrl.LongUrl, reqUrl.CustomUrlCode, os.Getenv("BASE_URL"))
+	shortCode := ""
 
-	urlColl := mgm.Coll(newUrl)
-
-	if err := urlColl.Create(newUrl); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"msg":     "Unable to save in DB",
-			"err":     err.Error(),
-		})
+	if reqUrl.CustomUrlCode != "" {
+		shortCode = reqUrl.CustomUrlCode
+	} else {
+		shortCode, _ = shortid.Generate()
 	}
 
-	return c.JSON(newUrl)
+	urlColl := mgm.CollectionByName("urls")
+	existingUrl := &models.Urls{}
+
+	println(shortCode)
+
+	if err := urlColl.First(bson.M{"urlCode": shortCode}, existingUrl); err != nil {
+		if err.Error() == "mongo: no documents in result" {
+			newUrl := models.CreateUrl(reqUrl.LongUrl, shortCode, os.Getenv("BASE_URL"))
+
+			if err := urlColl.Create(newUrl); err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"success": false,
+					"msg":     "Unable to save in DB",
+					"err":     err.Error(),
+				})
+			}
+
+			return c.JSON(newUrl)
+		}
+	}
+
+	return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+		"success":     false,
+		"msg":         "Url with same shortCode already exists",
+		"existingUrl": existingUrl,
+	})
+
 }
 
 func PatchEditUrl(c *fiber.Ctx) error {

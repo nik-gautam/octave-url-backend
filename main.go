@@ -29,7 +29,10 @@ func main() {
 	app.Use(logger.New())
 	//app.Use(cache.New())
 
-	app.Get("/", handlers.GetAllUrls)
+	app.Get("/", func(ctx *fiber.Ctx) error {
+		return ctx.SendString("Welcome to octave url shortener 2.0")
+	})
+	app.Get("/all", handlers.GetAllUrls)
 	app.Get("/:shortCode", handlers.GetLongUrl)
 	app.Post("/", handlers.PostAddUrl)
 	app.Patch("/", handlers.PatchEditUrl)

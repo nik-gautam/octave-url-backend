@@ -89,7 +89,12 @@ func PostAddUrl(c *fiber.Ctx) error {
 	urlColl := mgm.CollectionByName("urls")
 	existingUrl := &models.Urls{}
 
-	println(shortCode)
+	if reqUrl.LongUrl == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"msg":     "Sahi se URL daalo",
+		})
+	}
 
 	if err := urlColl.First(bson.M{"urlCode": shortCode}, existingUrl); err != nil {
 		if err.Error() == "mongo: no documents in result" {
@@ -121,6 +126,13 @@ func PatchEditUrl(c *fiber.Ctx) error {
 	existingUrl := &models.Urls{}
 
 	reqUrl := new(PatchUrl)
+
+	if reqUrl.LongUrl == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"msg":     "Sahi se URL daalo",
+		})
+	}
 
 	if err := c.BodyParser(reqUrl); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
